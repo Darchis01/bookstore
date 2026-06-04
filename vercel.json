@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "manage.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "manage.py" }
+  ],
+  "env": {
+    "SECRET_KEY": "@SECRET_KEY",
+    "FLUTTERWAVE_PUBLIC_KEY": "@FLUTTERWAVE_PUBLIC_KEY",
+    "FLUTTERWAVE_SECRET_KEY": "@FLUTTERWAVE_SECRET_KEY",
+    "FLUTTERWAVE_CURRENCY": "@FLUTTERWAVE_CURRENCY"
+  }
+}
