@@ -4,7 +4,7 @@
     { "src": "bookstore-django/bookstore-django/wsgi.py", "use": "@vercel/python" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "b" }
+    { "src": "/(.*)", "dest": "bookstore-django/bookstore-django/wsgi.py" }
   ],
   "env": {
     "SECRET_KEY": "@SECRET_KEY",
