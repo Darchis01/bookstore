@@ -1,10 +1,10 @@
 {
   "version": 2,
   "builds": [
-    { "src": "bookstore-django/bookstore-django/wsgi.py", "use": "@vercel/python" }
+    { "src": "bookstore-django/manage.py", "use": "@vercel/python" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "bookstore-django/bookstore-django/wsgi.py" }
+    { "src": "/(.*)", "dest": "bookstore-django/manage.py" }
   ],
   "env": {
     "SECRET_KEY": "@SECRET_KEY",

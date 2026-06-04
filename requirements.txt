@@ -11,3 +11,4 @@ rave_python
 django-allauth
 PyJWT
 cryptography
+whitenoise
