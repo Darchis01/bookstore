@@ -1,0 +1,13 @@
+django
+djangorestframework
+django-cors-headers
+python-decouple
+psycopg2-binary
+gunicorn
+Pillow
+django-filter
+requests
+rave_python 
+django-allauth
+PyJWT
+cryptography

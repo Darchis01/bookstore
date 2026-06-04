@@ -1,0 +1,23 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Sign Up | Sciobe{% endblock %}
+
+{% block content %}
+<section class="auth-grid">
+    <div class="auth-panel">
+        <p class="eyebrow">Create account</p>
+        <h1>Join Sciobe Today</h1>
+        <p class="section-copy">Create your account in seconds and start building your personal library. Exclusive deals, personalized recommendations, and seamless checkout await.</p>
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="button button-primary">Create account</button>
+        </form>
+        <div class="social-login">
+            <p class="section-copy">Or sign up with</p>
+            <a href="/accounts/google/login/" class="button button-secondary google-button">Continue with Google</a>
+        </div>
+        <p class="auth-note">Already have an account? <a href="{% url 'login' %}">Login here</a>.</p>
+    </div>
+</section>
+{% endblock %}

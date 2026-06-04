@@ -1,0 +1,46 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Home | Sciobe{% endblock %}
+
+{% block content %}
+<div class="hero-grid">
+    <section class="hero-card">
+        <p class="eyebrow">Welcome to Sciobe</p>
+        <h1>Your Gateway to Unlimited Books and Seamless Shopping</h1>
+        <p class="hero-copy">Sciobe is a modern, intelligent bookstore designed for book lovers and avid readers. Explore thousands of titles, track your purchases, and build your personal library all in one place. Whether you're searching for bestsellers, classics, or niche reads, Sciobe brings the world of books to your fingertips with fast checkout, secure transactions, and personalized recommendations.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="{% url 'books' %}">Browse Books</a>
+            {% if not request.user.is_authenticated %}
+                <a class="button button-secondary" href="{% url 'signup' %}">Get Started</a>
+            {% endif %}
+        </div>
+    </section>
+    <section class="hero-image">
+        <div class="hero-poster">
+            <h2>Featured Collection</h2>
+            <ul class="feature-list">
+                {% for book in featured_books %}
+                    <li>{{ book.title }}<span>{{ book.author }}</span></li>
+                {% empty %}
+                    <li>No books available yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+</div>
+
+<section class="feature-grid">
+    <article class="feature-card">
+        <h2>🎯 Personalized Discovery</h2>
+        <p>Get smart recommendations based on your reading habits and preferences. Find your next favorite book effortlessly and dive into curated collections tailored just for you.</p>
+    </article>
+    <article class="feature-card">
+        <h2>📚 Vast Collection</h2>
+        <p>Access millions of titles across all genres. From fiction to science, self-help to history—Sciobe connects you to an ever-growing library of knowledge and entertainment.</p>
+    </article>
+    <article class="feature-card">
+        <h2>⚡ Lightning-Fast Checkout</h2>
+        <p>Seamless, secure purchasing experience. Complete your transactions in seconds and start reading immediately. Multiple payment options and instant order confirmation.</p>
+    </article>
+</section>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Profile | Sciobe{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">My Library</p>
+        <h1>{{ customer.name }}</h1>
+        <p class="section-copy">Manage your customer account, review past transactions, and access purchased books.</p>
+    </div>
+</section>
+
+<div class="profile-grid">
+    <aside class="profile-card">
+        <h2>Customer details</h2>
+        <ul class="meta-list">
+            <li><strong>Customer ID:</strong> {{ customer.customer_id }}</li>
+            <li><strong>Email:</strong> {{ customer.email }}</li>
+            <li><strong>Phone:</strong> {{ customer.phone|default:'Not provided' }}</li>
+            <li><strong>Member since:</strong> {{ customer.created_at|date:"F j, Y \a\t g:i A" }}</li>
+            <li><strong>Last updated:</strong> {{ customer.updated_at|date:"F j, Y \a\t g:i A" }}</li>
+            <li><strong>Total spent:</strong> ₦{{ total_spent }}</li>
+            <li><strong>Orders:</strong> {{ sales.count }}</li>
+        </ul>
+    </aside>
+    <section class="activity-panel">
+        <h2>Purchased Books</h2>
+        {% if purchased_books %}
+            <div class="library-grid">
+                {% for book in purchased_books %}
+                    <article class="book-card small-card">
+                        <h3>{{ book.title }}</h3>
+                        <p>{{ book.author }}</p>
+                        <span class="book-price">₦{{ book.price }}</span>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>You have not purchased any books yet. Visit the <a href="{% url 'books' %}">book catalog</a> to get started.</p>
+        {% endif %}
+
+        <h2 style="margin-top: 2rem;">Wishlist</h2>
+        {% if wishlist.books.all %}
+            <div class="library-grid">
+                {% for book in wishlist.books.all %}
+                    <article class="book-card small-card">
+                        <h3>{{ book.title }}</h3>
+                        <p>{{ book.author }}</p>
+                        <span class="book-price">₦{{ book.price }}</span>
+                        <a href="{% url 'book_detail' book.book_id %}" class="button button-primary" style="display: inline-block; margin-top: 0.5rem;">View & Buy</a>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Your wishlist is empty. <a href="{% url 'books' %}">Browse books</a> and use the heart button to add them to your wishlist.</p>
+        {% endif %}
+
+        <h2>Transaction history</h2>
+        {% if sales %}
+            <div class="sales-table-wrapper">
+                <table class="sales-table">
+                    <thead>
+                        <tr>
+                            <th>Sale ID</th>
+                            <th>Book</th>
+                            <th>Date</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                            <tr>
+                                <td>{{ sale.sale_id }}</td>
+                                <td>{{ sale.book.title }}</td>
+                                <td>{{ sale.date }}</td>
+                                <td>{{ sale.quantity }}</td>
+                                <td>₦{{ sale.total_price }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>No transactions yet. Purchase a book to see your history.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

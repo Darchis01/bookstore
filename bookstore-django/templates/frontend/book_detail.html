@@ -1,0 +1,173 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}{{ book.title }} | Sciobe{% endblock %}
+
+{% block content %}
+<section class="detail-header">
+    <div>
+        <p class="eyebrow">Book details</p>
+        <h1>{{ book.title }}</h1>
+        <p class="section-copy">Author: {{ book.author }}</p>
+    </div>
+    <div class="detail-price">₦{{ book.price }}</div>
+</section>
+
+<div class="detail-grid">
+    <div class="detail-summary">
+        <h2>About this book</h2>
+        <div class="book-summary" style="margin-top: 1rem;">
+            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.75; margin: 0;">{{ book.description }}</p>
+        </div>
+        <ul class="meta-list">
+            <li><strong>Book ID:</strong> {{ book.book_id }}</li>
+            <li><strong>Author:</strong> {{ book.author }}</li>
+            <li><strong>Price:</strong> ₦{{ book.price }}</li>
+        </ul>
+    </div>
+    <div class="detail-card">
+        <div class="payment-box">
+            <div class="payment-summary">
+                <h3>Checkout</h3>
+                <p class="section-copy">Secure payment powered by Flutterwave. Choose your preferred payment channel and complete the purchase instantly.</p>
+                <div class="payment-item"><span>Book</span><strong>{{ book.title }}</strong></div>
+                <div class="payment-item"><span>Price</span><strong>₦{{ book.price }}</strong></div>
+                <div class="payment-item"><span>Quantity</span><strong>{{ form.quantity }}</strong></div>
+            </div>
+            <form id="payment-form" class="purchase-form">
+                {% csrf_token %}
+                <label for="payment-method" class="payment-label">Payment method</label>
+                <select id="payment-method" name="payment_method" class="payment-select">
+                    <option value="card">Card</option>
+                    <option value="banktransfer">Bank Transfer</option>
+                    <option value="ussd">USSD</option>
+                    <option value="mobilemoney">Mobile Money</option>
+                </select>
+                <button type="button" id="flutterwave-pay-button" class="button button-primary" style="margin-top: 1.5rem; width: 100%;">Pay with Flutterwave</button>
+                <p id="payment-help" class="payment-help">Pay your way with card, bank transfer, USSD, or mobile money — secure checkout with Flutterwave.</p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.flutterwave.com/v3.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const payButton = document.getElementById('flutterwave-pay-button');
+        const csrfToken = getCookie('csrftoken');
+
+        payButton?.addEventListener('click', async () => {
+            const quantityInput = document.querySelector('#payment-form input[name="quantity"]');
+            const paymentMethod = document.getElementById('payment-method').value;
+            const quantity = quantityInput ? quantityInput.value : 1;
+            const payload = {
+                book_id: {{ book.book_id }},
+                quantity: quantity,
+                payment_method: paymentMethod,
+            };
+
+            try {
+                const response = await fetch('{% url "flutterwave_init" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Unable to start payment.');
+                }
+
+                const publicKey = data.public_key;
+                const txRef = data.tx_ref;
+                const bookTitle = "{{ book.title|escapejs }}";
+
+                FlutterwaveCheckout({
+                    PBFPubKey: publicKey,
+                    tx_ref: txRef,
+                    amount: data.amount,
+                    currency: data.currency,
+                    payment_options: 'card,banktransfer,ussd,mobilemoney',
+                    customer: {
+                        email: data.customer_email,
+                        phone_number: data.customer_phone || '',
+                        name: data.customer_name,
+                    },
+                    customizations: {
+                        title: 'Sciobe Bookstore',
+                        description: 'Payment for ' + bookTitle,
+                    },
+                    callback: async function(response) {
+                        if (response.status === 'successful') {
+                            await verifyPayment(response.transaction_id, txRef);
+                        }
+                    },
+                    onclose: function() {
+                        displayMessage('Payment window closed. No payment was completed.', 'warning');
+                    },
+                });
+            } catch (error) {
+                displayMessage(error.message || 'Payment initialization failed.', 'error');
+            }
+        });
+
+        async function verifyPayment(transactionId, txRef) {
+            try {
+                const response = await fetch('{% url "flutterwave_verify" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: JSON.stringify({ transaction_id: transactionId, tx_ref: txRef }),
+                });
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'Payment verification failed.');
+                }
+
+                displayMessage(data.message || 'Payment completed successfully.', 'success');
+                setTimeout(() => window.location.reload(), 1200);
+            } catch (error) {
+                displayMessage(error.message || 'Payment verification failed.', 'error');
+            }
+        }
+
+        function displayMessage(message, type) {
+            const feedback = document.createElement('div');
+            feedback.textContent = message;
+            feedback.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'error' ? '#dc2626' : type === 'warning' ? '#f97316' : '#10b981'};
+                color: white;
+                padding: 14px 18px;
+                border-radius: 12px;
+                z-index: 9999;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+            `;
+            document.body.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 3000);
+        }
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>{% block title %}Sciobe | Bookstore{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/site.css' %}?v={% now 'U' %}" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="{% url 'home' %}">
+                <img src="{% static 'slogo.jpg' %}" alt="Sciobe Logo" class="logo" style="height: 40px; width: auto; margin-right: 10px; vertical-align: middle;">
+                <span style="vertical-align: middle;">Sciobe</span>
+            </a>
+            <nav class="main-nav">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'books' %}">Books</a>
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'profile' %}">My Library</a>
+                    <a href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Login</a>
+                    <a href="{% url 'signup' %}">Sign Up</a>
+                {% endif %}
+            </nav>
+            <div class="header-controls">
+                <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+                    <span id="theme-icon">🌙</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="container">
+            {% if messages %}
+                <div class="notifications">
+                    {% for message in messages %}
+                        <div class="notification {{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div class="footer-columns">
+                <div class="footer-column">
+                    <h3>About Sciobe</h3>
+                    <p>Your premier digital bookstore platform. Discover, browse, and purchase books with ease.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li><a href="{% url 'home' %}" style="text-decoration: none; color: inherit;">Home</a></li>
+                        <li><a href="{% url 'books' %}" style="text-decoration: none; color: inherit;">Browse Books</a></li>
+                        <li><a href="{% url 'profile' %}" style="text-decoration: none; color: inherit;">My Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <p>
+                        <strong>Phone:</strong> <a href="tel:08164397550" style="text-decoration: none; color: inherit;">+234 816 439 7550</a><br>
+                        <strong>Email:</strong> <a href="mailto:chisomdarlynton@gmail.com" style="text-decoration: none; color: inherit;">chisomdarlynton@gmail.com</a>
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p style="margin: 0; font-size: 14px; color: var(--text-muted);">&copy; 2026 Sciobe Bookstore. All rights reserved. Built with Django.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality - Initialize on page load
+        function initTheme() {
+            const htmlRoot = document.getElementById('html-root');
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            
+            // Check for saved theme preference or default to light mode
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const currentTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+            
+            // Set initial theme
+            if (currentTheme === 'dark') {
+                htmlRoot.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+                document.body.style.backgroundColor = '#0f1419';
+            } else {
+                htmlRoot.removeAttribute('data-theme');
+                themeIcon.textContent = '🌙';
+                document.body.style.backgroundColor = '#f4f7fb';
+            }
+            localStorage.setItem('theme', currentTheme);
+        }
+        
+        // Initialize theme immediately to prevent flash
+        initTheme();
+        
+        // Toggle theme on button click
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('theme-toggle');
+            const htmlRoot = document.getElementById('html-root');
+            const themeIcon = document.getElementById('theme-icon');
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = htmlRoot.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                if (newTheme === 'dark') {
+                    htmlRoot.setAttribute('data-theme', 'dark');
+                    themeIcon.textContent = '☀️';
+                    document.body.style.backgroundColor = '#0f1419';
+                } else {
+                    htmlRoot.removeAttribute('data-theme');
+                    themeIcon.textContent = '🌙';
+                    document.body.style.backgroundColor = '#f4f7fb';
+                }
+                
+                localStorage.setItem('theme', newTheme);
+            });
+        });
+    </script>
+
+</body>
+</html>

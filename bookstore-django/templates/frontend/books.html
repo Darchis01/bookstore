@@ -1,0 +1,178 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Books | Sciobe{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div style="width: 100%;">
+        <p class="eyebrow">Book Catalog</p>
+        <h1>Discover Thousands of Books</h1>
+        <p class="section-copy">Search through our vast collection across multiple categories. Find your next favorite read instantly.</p>
+    </div>
+</section>
+
+<!-- Search Bar -->
+<form method="get" style="margin-bottom: 2rem;">
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <input 
+            type="text" 
+            name="search" 
+            placeholder="Search by title, author, or keyword..." 
+            value="{{ search_query }}"
+            class="search-box"
+            style="flex: 1; min-width: 200px; width: auto; color: var(--text); background: var(--surface); border: 1px solid var(--border); padding: 0.8rem 1rem; border-radius: 8px;"
+        >
+        <button type="submit" class="button button-primary">Search</button>
+        {% if search_query or selected_category %}
+            <a href="{% url 'books' %}" class="button button-secondary">Clear Filters</a>
+        {% endif %}
+    </div>
+</form>
+
+<!-- Category Filter -->
+<div style="margin-bottom: 2rem;">
+    <h3 style="margin-top: 0; color: var(--text);">Browse by Category</h3>
+    <div class="category-filter">
+        <a href="{% url 'books' %}" class="category-btn {% if not selected_category %}active{% endif %}">
+            All Books
+        </a>
+        {% for category in categories %}
+            <a href="?category={{ category.category_id }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+               class="category-btn {% if selected_category|stringformat:'s' == category.category_id|stringformat:'s' %}active{% endif %}">
+                {{ category.name }}
+            </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Books Grid -->
+<div class="cards-grid">
+    {% for book in books %}
+        <article class="book-card">
+            <div class="book-card-header">
+                {% if book.category %}
+                    <span style="font-size: 0.85rem; color: var(--accent); font-weight: 600; text-transform: uppercase;">{{ book.category.name }}</span>
+                {% endif %}
+                <span class="book-price">₦{{ book.price }}</span>
+            </div>
+            <h2 style="margin: 1rem 0 0.5rem;">{{ book.title }}</h2>
+            <p class="book-author" style="margin: 0.5rem 0;">By {{ book.author }}</p>
+            {% if book.description %}
+                <div style="margin: 0.75rem 0;">
+                    <p style="font-size: 0.85rem; color: var(--accent); font-weight: 600; text-transform: uppercase; margin-bottom: 0.25rem;">About This Book</p>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin: 0;">{{ book.description|truncatewords:25 }}</p>
+                </div>
+            {% endif %}
+            <div class="book-actions">
+                <a class="button button-secondary" href="{% url 'book_detail' book.book_id %}">View Details</a>
+                {% if request.user.is_authenticated %}
+                    <a class="button button-primary" href="{% url 'book_detail' book.book_id %}">Buy Now</a>
+                    <button class="wishlist-btn{% if book.book_id in wishlist_book_ids %} active{% endif %}" data-book-id="{{ book.book_id }}" title="Toggle Wishlist">
+                        {% if book.book_id in wishlist_book_ids %}♥{% else %}♡{% endif %}
+                    </button>
+                {% else %}
+                    <a class="button button-secondary" href="{% url 'login' %}">Login to Buy</a>
+                {% endif %}
+            </div>
+        </article>
+    {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <p style="font-size: 1.1rem; color: var(--text-muted);">
+                {% if search_query or selected_category %}
+                    No books found matching your search. <a href="{% url 'books' %}">Try a different search or browse all books.</a>
+                {% else %}
+                    No books are available yet. Please check back later.
+                {% endif %}
+            </p>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Wishlist toggle functionality
+    document.addEventListener('DOMContentLoaded', () => {
+        const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+        
+        wishlistButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const bookId = button.getAttribute('data-book-id');
+                
+                try {
+                    const response = await fetch(`/api/books/${bookId}/toggle_wishlist/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        // Toggle heart icon between filled and empty
+                        if (data.in_wishlist) {
+                            button.textContent = '♥';
+                            button.classList.add('active');
+                            button.title = 'Remove from wishlist';
+                        } else {
+                            button.textContent = '♡';
+                            button.classList.remove('active');
+                            button.title = 'Add to wishlist';
+                        }
+                        
+                        // Show feedback
+                        const feedback = document.createElement('div');
+                        feedback.textContent = data.message;
+                        feedback.style.cssText = `
+                            position: fixed;
+                            top: 20px;
+                            right: 20px;
+                            background: var(--primary);
+                            color: white;
+                            padding: 12px 20px;
+                            border-radius: 8px;
+                            z-index: 9999;
+                            animation: fadeInOut 2s ease-in-out;
+                        `;
+                        document.body.appendChild(feedback);
+                        setTimeout(() => feedback.remove(), 2000);
+                    } else {
+                        alert('Error: ' + (data.error || 'Could not update wishlist'));
+                    }
+                } catch (error) {
+                    console.error('Error toggling wishlist:', error);
+                    alert('Error updating wishlist');
+                }
+            });
+        });
+    });
+    
+    // Helper function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Add fade animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}
