@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Sale
 from books.serializers import BookSerializer
-from customers.serializers import CustomerSerializer
+from books.customers.serializers import CustomerSerializer
 
 
 class SaleSerializer(serializers.ModelSerializer):

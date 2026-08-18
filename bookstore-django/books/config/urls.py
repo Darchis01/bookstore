@@ -9,8 +9,8 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('admin/', admin.site.urls),
     path('api/books/', include('books.urls')),
-    path('api/customers/', include('customers.urls')),
-    path('api/sales/', include('sales.urls')),
+    path('api/customers/', include('books.customers.urls')),
+    path('api/sales/', include('books.sales.urls')),
     path('api-auth/', include('rest_framework.urls')),
 ]
 

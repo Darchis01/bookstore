@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from django.contrib.auth.models import User
 from .models import Book
 from .serializers import BookSerializer
-from customers.models import Wishlist
+from books.customers.models import Wishlist
 
 
 class BookViewSet(viewsets.ModelViewSet):

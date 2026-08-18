@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Sale
 from .serializers import SaleSerializer, SaleCreateSerializer
-from customers.models import Customer
+from books.customers.models import Customer
 
 
 class SaleViewSet(viewsets.ModelViewSet):

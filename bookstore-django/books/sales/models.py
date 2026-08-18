@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
-from customers.models import Customer
+from books.customers.models import Customer
 from books.models import Book
 
 
