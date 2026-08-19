@@ -5,11 +5,5 @@
   ],
   "routes": [
     { "src": "/(.*)", "dest": "bookstore-django/books/config/wsgi.py" }
-  ],
-  "env": {
-    "SECRET_KEY": "@SECRET_KEY",
-    "FLUTTERWAVE_PUBLIC_KEY": "@FLUTTERWAVE_PUBLIC_KEY",
-    "FLUTTERWAVE_SECRET_KEY": "@FLUTTERWAVE_SECRET_KEY",
-    "FLUTTERWAVE_CURRENCY": "@FLUTTERWAVE_CURRENCY"
-  }
+  ]
 }
