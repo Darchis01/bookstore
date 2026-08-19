@@ -1,6 +1,20 @@
 import os
 from pathlib import Path
 from decouple import config
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+SECRET_KEY = config('SECRET_KEY', ...)
+DEBUG = config('DEBUG', ...)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', ...)
+
+INSTALLED_APPS = [...]
+MIDDLEWARE = [...]
+ROOT_URLCONF = 'books.config.urls'
+TEMPLATES = [...]
+WSGI_APPLICATION = 'books.config.wsgi.application'
+
+# DATABASES goes here — AFTER BASE_DIR is defined above
 import dj_database_url
 
 DATABASES = {
@@ -9,81 +23,6 @@ DATABASES = {
         conn_max_age=600,
     )
 }
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-change-in-production')
-
-DEBUG = config('DEBUG', default=True, cast=bool)
-
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'corsheaders',
-    'django_filters',
-    'books',
-    'books.customers',
-    'books.sales',
-    'frontend',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-]
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-ROOT_URLCONF = 'books.config.urls'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = 'books.config.wsgi.application'
-
-
-# Uncomment for PostgreSQL
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': config('DB_NAME', default='bookstore'),
-#         'USER': config('DB_USER', default='postgres'),
-#         'PASSWORD': config('DB_PASSWORD', default=''),
-#         'HOST': config('DB_HOST', default='localhost'),
-#         'PORT': config('DB_PORT', default='5432'),
-#     }
-# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
