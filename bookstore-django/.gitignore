@@ -70,3 +70,12 @@ celerybeat.pid
 node_modules/
 npm-debug.log
 yarn-error.log
+
+
+
+.env
+*.pyc
+__pycache__/
+db.sqlite3
+staticfiles/
+media/
